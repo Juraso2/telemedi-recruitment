@@ -1,0 +1,26 @@
+{
+  "name": "@telemedi/backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vp exec tsx watch --env-file-if-exists=.env src/index.ts",
+    "build": "vp exec tsc -p tsconfig.build.json",
+    "start": "node --env-file-if-exists=.env dist/index.js",
+    "test": "vp test",
+    "check": "vp check",
+    "lint": "vp lint",
+    "fmt": "vp fmt"
+  },
+  "dependencies": {
+    "@mastra/core": "^1.78.0",
+    "@mastra/fastify": "^1.5.22",
+    "fastify": "^5.12.7"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "^4.23.15",
+    "typescript": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

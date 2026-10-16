@@ -1,0 +1,14 @@
+**/node_modules
+**/dist
+**/coverage
+**/.vite
+**/.env
+**/.env.*
+!**/.env.example
+.git
+.vite-hooks
+.vscode
+.agents
+.codex
+.aws
+*.log
