@@ -1,3 +1,4 @@
+import { registerDemoAccess, type DemoAccessConfig } from './demo-access.js'
 import { MastraServer } from '@mastra/fastify'
 import Fastify, { LogController, type FastifyServerOptions } from 'fastify'
 import { mastra } from './mastra/index.js'
@@ -10,6 +11,15 @@ export async function buildApp(
     apiKey: process.env.OPENAI_API_KEY,
     model: process.env.OPENAI_MODEL,
     baseURL: process.env.OPENAI_BASE_URL,
+  },
+  access: DemoAccessConfig = {
+    code: process.env.DEMO_ACCESS_CODE,
+    secureCookies:
+      process.env.DEMO_COOKIE_SECURE === 'false'
+        ? false
+        : process.env.DEMO_COOKIE_SECURE === 'true'
+          ? true
+          : undefined,
   },
 ) {
   const app = Fastify({
@@ -45,6 +55,7 @@ export async function buildApp(
       'request_completed',
     )
   })
+  await registerDemoAccess(app, access)
   const server = new MastraServer({ app, mastra })
   await server.init()
 

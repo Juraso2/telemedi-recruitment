@@ -1,7 +1,9 @@
-import { expect, test, type Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import { expect, test, unlockDemo } from './fixtures.js'
 
 async function startAccount(page: Page) {
   await page.goto('/')
+  await unlockDemo(page)
   await expect(page.getByRole('button', { name: 'Zaczynam' })).toBeDisabled()
   await page.getByLabel('Mam ukończone 18 lat').check()
   await page.getByRole('button', { name: 'Zaczynam' }).click()

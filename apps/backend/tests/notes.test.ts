@@ -1,9 +1,22 @@
-import { afterEach, expect, it } from 'vite-plus/test'
+import { afterEach, beforeEach, expect, it, vi } from 'vite-plus/test'
 import { buildApp } from '../src/app.js'
 import { faithfulNote, openAIStub } from './openai-fixture.js'
 
+beforeEach(() => vi.stubEnv('DEMO_ACCESS_CODE', 'demo-test-code'))
+
+async function accessCookie(app: Awaited<ReturnType<typeof buildApp>>) {
+  const login = await app.inject({
+    method: 'POST',
+    url: '/api/demo-access',
+    payload: { code: 'demo-test-code' },
+  })
+  const cookie = login.cookies[0]!
+  return `${cookie.name}=${encodeURIComponent(cookie.value)}`
+}
+
 const cleanup: (() => Promise<unknown>)[] = []
 afterEach(async () => {
+  vi.unstubAllEnvs()
   for (const close of cleanup.splice(0).reverse()) await close()
 })
 
@@ -15,6 +28,7 @@ it('retries a transient provider failure once and preserves a sanitized manual r
   const response = await app.inject({
     method: 'POST',
     url: '/api/notes',
+    headers: { cookie: await accessCookie(app) },
     payload: {
       adultConfirmed: true,
       recipient: 'lekarz',
@@ -34,6 +48,7 @@ it('turns a confirmed personal account into a note through the OpenAI boundary',
   const response = await app.inject({
     method: 'POST',
     url: '/api/notes',
+    headers: { cookie: await accessCookie(app) },
     payload: {
       adultConfirmed: true,
       recipient: 'psychiatra',
@@ -55,7 +70,12 @@ it.each([
   cleanup.push(provider.close)
   const app = await buildApp({}, { apiKey: 'test-key', baseURL: provider.baseURL })
   cleanup.push(() => app.close())
-  const response = await app.inject({ method: 'POST', url: '/api/notes', payload })
+  const response = await app.inject({
+    method: 'POST',
+    url: '/api/notes',
+    headers: { cookie: await accessCookie(app) },
+    payload,
+  })
   expect(response.statusCode).toBe(400)
   expect(provider.requests).toHaveLength(0)
 })
@@ -68,6 +88,7 @@ it('returns an out-of-scope result without a generated note', async () => {
   const response = await app.inject({
     method: 'POST',
     url: '/api/notes',
+    headers: { cookie: await accessCookie(app) },
     payload: { adultConfirmed: true, recipient: 'psycholog', account: 'Napisz kod aplikacji.' },
   })
   expect(response.statusCode).toBe(422)
@@ -95,7 +116,7 @@ it('never retries rejected credentials or exposes private content in responses a
   const response = await app.inject({
     method: 'POST',
     url: '/api/notes?private_query=SECRET-query',
-    headers: { authorization: 'Bearer SECRET-auth' },
+    headers: { authorization: 'Bearer SECRET-auth', cookie: await accessCookie(app) },
     payload: {
       adultConfirmed: true,
       recipient: 'lekarz',
@@ -120,6 +141,7 @@ it('recovers after one transient failure, without extra framework retries', asyn
   const response = await app.inject({
     method: 'POST',
     url: '/api/notes',
+    headers: { cookie: await accessCookie(app) },
     payload: { adultConfirmed: true, recipient: 'psychoterapeuta', account: 'Jest mi ciężko.' },
   })
   expect(response.json()).toEqual({ note: faithfulNote })
@@ -132,6 +154,7 @@ it('explains missing configuration without needing an API key at startup', async
   const response = await app.inject({
     method: 'POST',
     url: '/api/notes',
+    headers: { cookie: await accessCookie(app) },
     payload: { adultConfirmed: true, recipient: 'lekarz', account: 'Jest mi ciężko.' },
   })
   expect(response.statusCode).toBe(503)

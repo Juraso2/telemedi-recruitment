@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
+import { DemoAccess, useDemoAccess } from '@/components/DemoAccess'
 import { NoteReview } from '@/components/NoteReview'
 
 const recipients = [
@@ -37,6 +38,8 @@ const titles: Record<Step, string> = {
 const errors: Record<string, string> = {
   out_of_scope:
     'Opisz własne doświadczenia lub to, czego nie udało Ci się przekazać specjaliście. Twój tekst pozostaje do poprawienia.',
+  rate_limited:
+    'Osiągnięto limit operacji AI w demo. Spróbuj ponownie za godzinę. Twoja wypowiedź została zachowana.',
   invalid_input: 'Sprawdź wypowiedź, adresata i potwierdzenie pełnoletności.',
   configuration:
     'Generowanie wymaga poprawnej konfiguracji OpenAI w backendzie. Poproś osobę uruchamiającą aplikację o sprawdzenie klucza i modelu. Twoja wypowiedź została zachowana.',
@@ -45,6 +48,7 @@ const generationError =
   'Nie udało się przygotować notatki. Twoja wypowiedź została zachowana. Możesz spróbować ponownie.'
 
 export function App() {
+  const access = useDemoAccess()
   const [step, setStep] = useState<Step>('intro')
   const [adultConfirmed, setAdultConfirmed] = useState(false)
   const [recipient, setRecipient] = useState<Recipient | null>(null)
@@ -54,8 +58,8 @@ export function App() {
   const heading = useRef<HTMLHeadingElement>(null)
   const submitting = useRef(false)
   useEffect(() => {
-    heading.current?.focus()
-  }, [step])
+    if (!access.expired) heading.current?.focus()
+  }, [step, access.expired, access.expiresAt])
 
   function advance(event: FormEvent, next: Step) {
     event.preventDefault()
@@ -71,7 +75,8 @@ export function App() {
     setStep('intro')
   }
   async function generate() {
-    if (submitting.current || !adultConfirmed || !recipient || !account.trim()) return
+    if (!access.expiresAt || submitting.current || !adultConfirmed || !recipient || !account.trim())
+      return
     submitting.current = true
     setError('')
     setStep('loading')
@@ -91,7 +96,8 @@ export function App() {
           typeof result.code === 'string'
             ? result.code
             : 'generation_failed'
-        setError(errors[code] ?? generationError)
+        if (response.status === 401) access.invalidate()
+        else setError(errors[code] ?? generationError)
         setStep(code === 'out_of_scope' ? 'account' : 'review')
       } else if (
         result &&
@@ -181,6 +187,7 @@ export function App() {
             <h1 id="step-heading" ref={heading} tabIndex={-1}>
               {titles[step]}
             </h1>
+            <DemoAccess access={access} />
             {error && (
               <div role="alert" className="error-message">
                 {error}
@@ -319,7 +326,11 @@ export function App() {
                   >
                     Popraw wypowiedź
                   </Button>
-                  <Button className="primary-action" onClick={() => void generate()}>
+                  <Button
+                    className="primary-action"
+                    disabled={access.checking || !access.expiresAt}
+                    onClick={() => void generate()}
+                  >
                     {error ? 'Spróbuj ponownie' : 'Przygotuj notatkę'}{' '}
                     <span aria-hidden="true">→</span>
                   </Button>

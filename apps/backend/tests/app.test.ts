@@ -17,9 +17,9 @@ describe('API', () => {
     expect(response.json()).toEqual({ status: 'ok' })
   })
 
-  it('exposes Mastra routes through the Fastify adapter without an AI key', async () => {
+  it('protects the general Mastra routes with the same access check', async () => {
     const response = await app.inject({ method: 'GET', url: '/api/agents' })
-    expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual({})
+    expect(response.statusCode).toBe(401)
+    expect(response.json()).toMatchObject({ code: 'access_required' })
   })
 })

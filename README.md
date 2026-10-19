@@ -2,8 +2,9 @@
 
 To, czego nie udało Ci się powiedzieć.
 
-Ścieżka tekstowa z [ticketu #2](https://github.com/Juraso2/telemedi-recruitment/issues/2)
-i [ticketu #3](https://github.com/Juraso2/telemedi-recruitment/issues/3):
+Ścieżka tekstowa z [ticketu #2](https://github.com/Juraso2/telemedi-recruitment/issues/2),
+[ticketu #3](https://github.com/Juraso2/telemedi-recruitment/issues/3)
+i [ticketu #4](https://github.com/Juraso2/telemedi-recruitment/issues/4):
 wprowadzenie i potwierdzenie pełnoletności → wybór specjalisty → wpisanie wypowiedzi →
 sprawdzenie i zatwierdzenie źródła → notatka przygotowana przez OpenAI i Mastrę →
 edycja → zatwierdzenie treści → kopiowanie.
@@ -14,9 +15,56 @@ nie ma dopisywać faktów, diagnoz ani zaleceń. Jest to generowany tekst, któr
 zawierać błędy, a nie narzędzie diagnostyczne. Jakość wymaga sprawdzenia na rzeczywistym modelu.
 
 Obecna wersja dostarcza tekstową podstawę procesu. Nagrywanie przez ElevenLabs,
-pytanie uzupełniające, historia oraz kod dostępu
-są osobnymi ticketami. Aplikacja nie wysyła wiadomości specjaliście.
-Obecnej wersji nie należy udostępniać jako publicznego demo przed wdrożeniem kontroli dostępu.
+pytanie uzupełniające i historia są osobnymi ticketami. Aplikacja nie wysyła wiadomości specjaliście.
+
+## Dostęp do demo
+
+W `apps/backend/.env` ustaw własny, losowy `DEMO_ACCESS_CODE` o długości 12–256 znaków.
+Nie używaj kodu testowego z repozytorium. Pusty lub zbyt krótki kod blokuje uzyskanie
+dostępu, a backend nadal udostępnia healthcheck. Kod nie trafia do bundla frontendu.
+
+Formularz kodu odblokowuje operacje AI. Wpisywanie, edycja i kopiowanie już gotowej
+notatki pozostają lokalnie dostępne. Błędny kod nie daje dostępu. Wygaśnięcie pokazuje
+formularz ponownie i nie resetuje bieżącej wypowiedzi, adresata ani notatki.
+Po odnowieniu użytkownik sam ponawia generowanie. Odświeżenie zachowuje dostęp,
+ale bieżący tekst nadal znika, ponieważ historia jest osobnym ticketem.
+Widoczność przyszłej historii po wygaśnięciu wymaga uzgodnienia przed jej wdrożeniem.
+
+`POST /api/demo-access` przyjmuje `{ "code": "…" }`. Po poprawnym kodzie ustawia
+podpisane HMAC-SHA256 ciasteczko `demo_access`, HttpOnly, SameSite=Strict, Path=/api.
+Zawiera tylko termin ważności, bez kodu i treści sesji. Backend sprawdza podpis
+oraz termin na każdym chronionym żądaniu, niezależnie od stanu przycisków w UI.
+Ważność wynosi 24 godziny od wpisania kodu, bez przedłużania przy odświeżeniu
+lub wywołaniach API. `GET /api/demo-access` zwraca ten termin albo `null`, bez
+wydawania nowego ciasteczka. Odpowiedzi API mają `Cache-Control: no-store`.
+
+Ochrona jest wspólnym hookiem dla wszystkich tras backendu oprócz healthchecku
+i wejścia przez kod, obejmuje też ogólne API Mastry. Kolejne operacje dostawców
+podlegają tej samej kontroli. Klucz podpisu jest losowany na start procesu,
+więc restart lub zmiana kodu z restartem unieważnia wcześniejszy dostęp.
+Mechanizm jest przeznaczony dla jednej instancji demo, bez kont i bazy sesji.
+Kod i ciasteczko nie są zapisywane w localStorage, sessionStorage ani logach.
+Wspólny kod nie izoluje osób używających tej samej przeglądarki i nie szyfruje
+lokalnych danych.
+
+Dla publicznego demo używaj HTTPS i `DEMO_COOKIE_SECURE=true`. Bez jawnego ustawienia
+Secure jest włączone przy `NODE_ENV=production`. Przykład `.env` ustawia `false`
+wyłącznie do lokalnego HTTP, także Docker Compose na adresie NetBird.
+Przy `Secure=true` na takim HTTP przeglądarka nie prześle ciasteczka.
+Nie są wymagane CORS ani udostępnianie backendu na osobnej domenie: frontend
+korzysta z tego samego originu przez proxy.
+
+Limity `@fastify/rate-limit` działają w pamięci procesu według IP połączenia:
+5 zgłoszeń kodu na 15 minut, łącznie z poprawnymi, oraz 20 chronionych żądań API
+na godzinę, wspólnie dla tras i kolejnych sesji dostępu. Limit obejmuje także
+nieudane operacje; automatyczna próba ponowienia u dostawcy należy do tego samego
+żądania. `429` zawiera `Retry-After`; UI zachowuje tekst i informuje o oczekiwaniu.
+Ponowne wpisanie kodu nie zeruje limitu operacji. Restart zeruje liczniki.
+Backend domyślnie nie ufa `X-Forwarded-For`, więc nie da się nim zmienić limitowanego
+IP. Za proxy Nginx użytkownicy dzielą limit adresu proxy. To celowo zachowawcze
+ograniczenie kosztów małego demo; wdrożenie na wiele instancji wymaga wspólnego
+magazynu limitów i konfiguracji zaufanych proxy. Warto też ustawić budżet po stronie
+dostawcy, ponieważ limity procesu nie stanowią limitu wydatków konta.
 
 ## Weryfikacja i kopiowanie notatki
 
@@ -38,7 +86,7 @@ W tej wersji nie ma historii ani automatycznego wysyłania wiadomości specjali�
 ## Klucze i dane
 
 Skopiuj `apps/backend/.env.example` do `apps/backend/.env` i ustaw własny
-`OPENAI_API_KEY`. Domyślny model to `gpt-4.1-mini`; możesz zmienić `OPENAI_MODEL`
+`OPENAI_API_KEY` oraz `DEMO_ACCESS_CODE`. Domyślny model to `gpt-4.1-mini`; możesz zmienić `OPENAI_MODEL`
 na dostępny na Twoim koncie model obsługujący Chat Completions i Structured Outputs.
 Opcjonalne `OPENAI_BASE_URL` służy do konfiguracji adresu dostawcy; nie wpisuj go we frontendzie.
 
@@ -173,12 +221,18 @@ zatwierdzenie, dokładną treść przekazaną do schowka, ręczne zaznaczenie po
 ponowienie kopiowania, ignorowanie opóźnionego wyniku i rozpoczęcie nowej sesji.
 Schowek jest kontrolowaną granicą przeglądarki: testy nie odczytują schowka użytkownika.
 Testy API sprawdzają walidację, liczbę prób,
-brak klucza i brak wrażliwej treści w logach.
+brak klucza i brak wrażliwej treści w logach. Dodatkowe testy obejmują
+bezpośrednią odmowę dostępu do AI, niepoprawny kod, podpis i prywatność ciasteczka,
+stałe 24 godziny, limity prób i operacji oraz odzyskanie dostępu bez utraty wypowiedzi.
+Czas jest kontrolowaną granicą testów API i UI; produkcyjne API nie ma endpointu
+do zmiany zegara. Wyłącznie serwer testowy ufa syntetycznym IP, aby każdy scenariusz
+sprawdzać z rzeczywistymi limitami bez wpływu na pozostałe testy.
 
 Przed pierwszym uruchomieniem testów zainstaluj Chromium: `vp exec playwright install chromium`.
 W devbox testy wybierają adres NetBird z interfejsów sieciowych; w innym środowisku
 możesz ustawić `E2E_BASE_URL` wskazujący frontend na porcie 5174. Backend testowy
 zajmuje port 3100, więc nie zastępuje działającego backendu na porcie 3000.
+Jeśli porty są zajęte, użyj np. `E2E_API_PORT=3101 E2E_PORT=5175 vp run test:e2e`.
 
 Imitacja dostawcy potwierdza połączenie warstw i obsługę odpowiedzi, a nie jakość
 modelu. Osobne sprawdzenie z rzeczywistym kluczem wykonaj w aplikacji na syntetycznych
