@@ -25,3 +25,22 @@ release. Add a tool name to select part of the graph. For example, run
 - [ ] If setup, runtime, or package-manager behavior looks wrong, run `vp env doctor` and include its output when asking for help.
 
 <!--VITE PLUS END-->
+
+## Agent skills
+
+### Issue tracker
+
+Specyfikacje i tickety są w GitHub Issues repozytorium
+Juraso2/telemedi-recruitment.
+Zasady: docs/agents/issue-tracker.md.
+
+### Triage labels
+
+Używamy domyślnych pięciu etykiet triage.
+Mapowanie: docs/agents/triage-labels.md.
+
+### Domain docs
+
+Jeden wspólny kontekst domenowy dla frontendu i backendu:
+GLOSSARY.md oraz docs/adr/ w katalogu głównym.
+Zasady: docs/agents/domain.md.
