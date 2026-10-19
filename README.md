@@ -2,19 +2,38 @@
 
 To, czego nie udało Ci się powiedzieć.
 
-Pierwszy działający wycinek z [ticketu #2](https://github.com/Juraso2/telemedi-recruitment/issues/2):
+Ścieżka tekstowa z [ticketu #2](https://github.com/Juraso2/telemedi-recruitment/issues/2)
+i [ticketu #3](https://github.com/Juraso2/telemedi-recruitment/issues/3):
 wprowadzenie i potwierdzenie pełnoletności → wybór specjalisty → wpisanie wypowiedzi →
-sprawdzenie i zatwierdzenie źródła → notatka przygotowana przez OpenAI i Mastrę.
+sprawdzenie i zatwierdzenie źródła → notatka przygotowana przez OpenAI i Mastrę →
+edycja → zatwierdzenie treści → kopiowanie.
 
 Wybór problemu wynika z trudności w przekazaniu pominiętych informacji po konsultacji.
 AI porządkuje relację w pierwszej osobie, zachowuje niepewność i sprzeczności,
 nie ma dopisywać faktów, diagnoz ani zaleceń. Jest to generowany tekst, który może
 zawierać błędy, a nie narzędzie diagnostyczne. Jakość wymaga sprawdzenia na rzeczywistym modelu.
 
-Ten ticket dostarcza tekstową podstawę procesu. Nagrywanie przez ElevenLabs,
-pytanie uzupełniające, historia, edycja i kopiowanie gotowej notatki oraz kod dostępu
+Obecna wersja dostarcza tekstową podstawę procesu. Nagrywanie przez ElevenLabs,
+pytanie uzupełniające, historia oraz kod dostępu
 są osobnymi ticketami. Aplikacja nie wysyła wiadomości specjaliście.
 Obecnej wersji nie należy udostępniać jako publicznego demo przed wdrożeniem kontroli dostępu.
+
+## Weryfikacja i kopiowanie notatki
+
+Po wygenerowaniu można poprawić notatkę i rozwinąć podgląd zatwierdzonej wypowiedzi
+źródłowej. Edycja notatki nie zmienia źródła i nie uruchamia kolejnego wywołania AI.
+„Zatwierdź treść” otwiera podgląd, a dopiero w nim jest dostępny przycisk „Kopiuj”.
+Powrót do edycji cofa zatwierdzenie i potwierdzenie wcześniejszego kopiowania.
+Kopiowany tekst odpowiada dokładnie zatwierdzonej wersji, także podziałom na akapity.
+
+Kopiowanie przez Clipboard API wymaga bezpiecznego kontekstu i uprawnienia przeglądarki.
+Pod adresem NetBird z HTTP może być niedostępne. Wtedy notatka pozostaje widoczna,
+a aplikacja oferuje ponowienie oraz „Zaznacz tekst” do ręcznego kopiowania przez
+Ctrl+C, ⌘C lub opcję kopiowania na telefonie. Nie stosuje przestarzałego execCommand.
+
+Po wygenerowaniu można edytować wyłącznie notatkę, bez zmiany źródła i regenerowania.
+„Nowa sesja” czyści bieżącą wypowiedź, notatkę i zatwierdzenie, wracając do wprowadzenia.
+W tej wersji nie ma historii ani automatycznego wysyłania wiadomości specjaliście.
 
 ## Klucze i dane
 
@@ -149,7 +168,11 @@ vp run test:e2e
 Testy przeglądarkowe uruchamiają prawdziwy frontend i backend na osobnych portach
 oraz lokalną imitację zewnętrznego OpenAI. Nie mockują trasy `/api/notes` ani Mastry.
 Obejmują komputer i telefon, potwierdzenie pełnoletności, wynik, treść poza zakresem
-i zachowanie wypowiedzi po błędzie. Testy API sprawdzają walidację, liczbę prób,
+i zachowanie wypowiedzi po błędzie. Sprawdzają również podgląd źródła, edycję,
+zatwierdzenie, dokładną treść przekazaną do schowka, ręczne zaznaczenie po błędzie,
+ponowienie kopiowania, ignorowanie opóźnionego wyniku i rozpoczęcie nowej sesji.
+Schowek jest kontrolowaną granicą przeglądarki: testy nie odczytują schowka użytkownika.
+Testy API sprawdzają walidację, liczbę prób,
 brak klucza i brak wrażliwej treści w logach.
 
 Przed pierwszym uruchomieniem testów zainstaluj Chromium: `vp exec playwright install chromium`.

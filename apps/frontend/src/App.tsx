@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
+import { NoteReview } from '@/components/NoteReview'
 
 const recipients = [
   {
@@ -60,6 +61,14 @@ export function App() {
     event.preventDefault()
     setError('')
     setStep(next)
+  }
+  function newSession() {
+    setAdultConfirmed(false)
+    setRecipient(null)
+    setAccount('')
+    setNote('')
+    setError('')
+    setStep('intro')
   }
   async function generate() {
     if (submitting.current || !adultConfirmed || !recipient || !account.trim()) return
@@ -327,17 +336,7 @@ export function App() {
               </output>
             )}
             {step === 'note' && (
-              <>
-                <p className="body-copy">
-                  Przeczytaj spokojnie i porównaj z tym, co chcesz przekazać. AI może popełniać
-                  błędy.
-                </p>
-                <div className="note-paper">{note}</div>
-                <p className="note-footnote">
-                  To propozycja tekstu na podstawie Twojej relacji. Nikt nie otrzymał jej
-                  automatycznie.
-                </p>
-              </>
+              <NoteReview note={note} source={account} onNewSession={newSession} />
             )}
           </div>
           <footer className="card-footer">

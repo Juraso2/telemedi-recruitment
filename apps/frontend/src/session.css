@@ -330,6 +330,43 @@ textarea::placeholder {
   font-size: 11px;
   line-height: 1.8;
 }
+.note-heading {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 550;
+}
+.note-heading:focus-visible {
+  outline: 2px solid #84665a;
+  outline-offset: 5px;
+}
+.note-source {
+  margin: 0 0 24px;
+}
+.note-source summary {
+  padding: 12px 0;
+  cursor: pointer;
+  color: #6b4544;
+  font-size: 13px;
+}
+.note-source summary:focus-visible {
+  outline: 2px solid #84665a;
+  outline-offset: 4px;
+}
+.copy-status {
+  display: block;
+  margin-top: 14px;
+  color: #5f584f;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.new-session-action {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #eee7dd;
+}
+.new-session-action .input-hint {
+  margin-bottom: 0;
+}
 .card-footer {
   border-top: 1px solid #eee7dd;
   padding: 17px 30px;
