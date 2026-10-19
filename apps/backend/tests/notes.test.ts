@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vite-plus/test'
-import { buildApp } from '../src/app.js'
+import { buildApp } from '../src/server.js'
 import { faithfulNote, openAIStub } from './openai-fixture.js'
 
 beforeEach(() => vi.stubEnv('DEMO_ACCESS_CODE', 'demo-test-code'))

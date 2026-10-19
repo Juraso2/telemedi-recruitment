@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test'
-import { buildApp } from '../src/app.js'
+import { buildApp } from '../src/server.js'
 
 let app: Awaited<ReturnType<typeof buildApp>>
 

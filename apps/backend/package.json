@@ -14,7 +14,6 @@
     "fmt": "vp fmt"
   },
   "dependencies": {
-    "@ai-sdk/openai": "catalog:",
     "@fastify/cookie": "catalog:",
     "@fastify/rate-limit": "catalog:",
     "@mastra/core": "^1.78.0",

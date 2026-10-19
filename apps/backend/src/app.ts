@@ -1,97 +1,25 @@
-import { registerDemoAccess, type DemoAccessConfig } from './demo-access.js'
-import { MastraServer } from '@mastra/fastify'
-import Fastify, { LogController, type FastifyServerOptions } from 'fastify'
-import { mastra } from './mastra/index.js'
-import { randomUUID } from 'node:crypto'
-import { createNoteWriter, noteFailure, noteRequest, type NoteModelConfig } from './notes.js'
+import type { FastifyInstance } from 'fastify'
+import type { createNoteService, NoteErrorCode } from './services/note-service.js'
 
-export async function buildApp(
-  options: FastifyServerOptions = {},
-  config: NoteModelConfig = {
-    apiKey: process.env.OPENAI_API_KEY,
-    model: process.env.OPENAI_MODEL,
-    baseURL: process.env.OPENAI_BASE_URL,
-  },
-  access: DemoAccessConfig = {
-    code: process.env.DEMO_ACCESS_CODE,
-    secureCookies:
-      process.env.DEMO_COOKIE_SECURE === 'false'
-        ? false
-        : process.env.DEMO_COOKIE_SECURE === 'true'
-          ? true
-          : undefined,
-  },
-) {
-  const app = Fastify({
-    ...options,
-    logController: new LogController({ disableRequestLogging: true }),
-    requestIdHeader: false,
-    genReqId: () => randomUUID(),
-  })
-  app.setErrorHandler((error, _request, reply) => {
-    const statusCode =
-      error &&
-      typeof error === 'object' &&
-      'statusCode' in error &&
-      typeof error.statusCode === 'number'
-        ? error.statusCode
-        : 500
-    const status = statusCode >= 400 && statusCode < 500 ? statusCode : 500
-    return reply.code(status).send({
-      code: 'request_failed',
-      message:
-        status < 500
-          ? 'Nieprawidłowe żądanie. Sprawdź dane i spróbuj ponownie.'
-          : 'Nie udało się obsłużyć żądania. Spróbuj ponownie.',
-    })
-  })
-  app.addHook('onResponse', async (request, reply) => {
-    request.log.info(
-      {
-        operation: request.routeOptions.url === '/api/notes' ? 'create_note' : 'http_request',
-        statusCode: reply.statusCode,
-        durationMs: Math.round(reply.elapsedTime),
-      },
-      'request_completed',
-    )
-  })
-  await registerDemoAccess(app, access)
-  const server = new MastraServer({ app, mastra })
-  await server.init()
+const noteStatus: Record<NoteErrorCode, number> = {
+  invalid_input: 400,
+  configuration: 503,
+  out_of_scope: 422,
+  provider_unavailable: 502,
+  generation_failed: 502,
+}
 
+export function registerApi(app: FastifyInstance, notes: ReturnType<typeof createNoteService>) {
   app.get('/api/health', async () => ({ status: 'ok' }))
-
-  const writeNote = createNoteWriter(config)
   app.post('/api/notes', async (request, reply) => {
-    reply.header('Cache-Control', 'no-store')
-    const input = noteRequest.safeParse(request.body)
-    if (!input.success)
-      return reply.code(400).send({
-        code: 'invalid_input',
-        message: 'Sprawdź wypowiedź, adresata i potwierdzenie pełnoletności.',
-      })
-    if (!writeNote)
-      return reply.code(503).send({
-        code: 'configuration',
-        message:
-          'Generowanie nie jest skonfigurowane. Osoba uruchamiająca aplikację musi ustawić klucz OpenAI w backendzie.',
-      })
-    try {
-      const result = await writeNote(input.data)
-      if (!result.inScope)
-        return reply.code(422).send({
-          code: 'out_of_scope',
-          message:
-            'Opisz własne doświadczenia lub to, czego nie udało Ci się przekazać specjaliście. Twój tekst pozostaje do poprawienia.',
-        })
-      if (!result.note.trim()) throw new Error('Empty note')
-      return { note: result.note.trim() }
-    } catch (error) {
-      const failure = noteFailure(error)
-      request.log.warn({ operation: 'create_note', code: failure.code }, 'note_failed')
-      return reply.code(failure.status).send({ code: failure.code, message: failure.message })
-    }
+    const result = await notes.createNote(request.body)
+    if (result.ok) return { note: result.note }
+    if (
+      result.code === 'provider_unavailable' ||
+      result.code === 'generation_failed' ||
+      result.code === 'configuration'
+    )
+      request.log.warn({ operation: 'create_note', code: result.code }, 'note_failed')
+    return reply.code(noteStatus[result.code]).send({ code: result.code, message: result.message })
   })
-
-  return app
 }

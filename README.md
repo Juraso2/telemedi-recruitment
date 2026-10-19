@@ -178,6 +178,22 @@ Adapter udostępnia API Mastry pod `/api`, np. `GET /api/agents`.
 Publiczna instancja Mastry pozostaje pusta i nie udostępnia agenta notatki przez
 ogólne trasy. Notatki są obsługiwane wyłącznie przez walidowaną trasę `/api/notes`.
 
+## Podział backendu
+
+- `src/app.ts` definiuje trasy notatki i healthcheck oraz mapuje wyniki serwisu na HTTP.
+- `src/server.ts` składa Fastify, middleware dostępu, logowanie i adapter Mastry.
+- `src/services/note-service.ts` waliduje wypowiedź, obsługuje generowanie, ponowienia
+  i bezpieczne wyniki błędów. Nie zależy od Fastify ani kodów HTTP.
+- `src/mastra/agents/note-agent.ts` definiuje agenta, instrukcje, model i schemat odpowiedzi.
+- `src/mastra/index.ts` tworzy prywatny runtime agenta na czas żądania. Instancja
+  podłączona do ogólnego API Mastry pozostaje pusta.
+
+Model jest konfigurowany przez wbudowany router Mastry jako `openai/<model>`.
+Klucz i opcjonalny adres dostawcy przekazujemy w konfiguracji routera, bez
+bezpośredniej zależności aplikacji od `@ai-sdk/openai`. Wywołanie agenta zachowuje
+Chat Completions, Structured Outputs i `store: false`.
+Sposób definiowania agentów opisuje [dokumentacja Mastry](https://mastra.ai/docs/agents/overview).
+
 ## Komponenty UI
 
 Frontend korzysta z shadcn/ui z komponentami Radix, Tailwind CSS v4 i motywem

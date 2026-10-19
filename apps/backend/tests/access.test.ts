@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vite-plus/test'
-import { buildApp } from '../src/app.js'
+import { buildApp } from '../src/server.js'
 import { openAIStub } from './openai-fixture.js'
 
 const cleanup: (() => Promise<unknown>)[] = []

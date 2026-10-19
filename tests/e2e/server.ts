@@ -1,4 +1,4 @@
-import { buildApp } from '../../apps/backend/src/app.js'
+import { buildApp } from '../../apps/backend/src/server.js'
 import { openAIStub } from '../../apps/backend/tests/openai-fixture.js'
 
 const provider = await openAIStub((body) => {
