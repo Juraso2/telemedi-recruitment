@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test:server": "vp exec tsx ../../tests/e2e/server.ts",
     "dev": "vp exec tsx watch --env-file-if-exists=.env src/index.ts",
     "build": "vp exec tsc -p tsconfig.build.json",
     "start": "node --env-file-if-exists=.env dist/index.js",
@@ -13,9 +14,11 @@
     "fmt": "vp fmt"
   },
   "dependencies": {
+    "@ai-sdk/openai": "catalog:",
     "@mastra/core": "^1.78.0",
     "@mastra/fastify": "^1.5.22",
-    "fastify": "^5.12.7"
+    "fastify": "^5.12.7",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",

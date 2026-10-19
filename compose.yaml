@@ -1,5 +1,8 @@
 services:
   backend:
+    env_file:
+      - path: ./apps/backend/.env
+        required: false
     build:
       context: .
       target: backend

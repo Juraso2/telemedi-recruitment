@@ -1,3 +1,3 @@
 import { Mastra } from '@mastra/core'
 
-export const mastra = new Mastra({})
+export const mastra = new Mastra({ logger: false })
