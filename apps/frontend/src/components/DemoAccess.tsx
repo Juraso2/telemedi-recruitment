@@ -103,7 +103,7 @@ export function DemoAccess({ access }: { access: Access }) {
         setError('Osiągnięto limit prób kodu. Odczekaj do 15 minut i spróbuj ponownie.')
       else if (response.status === 503)
         setError(
-          'Dostęp do demo wymaga konfiguracji kodu na serwerze. Poproś osobę udostępniającą demo o sprawdzenie ustawień.',
+          'Dostęp do demo nie jest poprawnie skonfigurowany. Osoba uruchamiająca aplikację powinna ustawić kod o długości 12–256 znaków i ponownie uruchomić backend.',
         )
       else throw new Error('Access failed')
     } catch {

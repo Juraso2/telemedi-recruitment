@@ -195,3 +195,18 @@ it('fails closed without configured demo access and never logs codes or credenti
   expect(denied.statusCode).toBe(503)
   expect(denied.cookies).toHaveLength(0)
 })
+
+it('keeps configuration failures separate from the code attempt limit', async () => {
+  const app = await buildApp({}, {}, { code: 'too-short' })
+  cleanup.push(() => app.close())
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const result = await app.inject({
+      method: 'POST',
+      url: '/api/demo-access',
+      payload: { code: 'anything' },
+    })
+    expect(result.statusCode).toBe(503)
+    expect(result.json()).toMatchObject({ code: 'access_configuration' })
+    expect(result.headers['retry-after']).toBeUndefined()
+  }
+})

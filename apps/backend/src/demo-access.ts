@@ -53,12 +53,12 @@ export async function registerDemoAccess(app: FastifyInstance, config: DemoAcces
   })
   app.get('/api/demo-access', async (request) => ({ expiresAt: expiresAt(request) }))
   app.post('/api/demo-access', async (request, reply) => {
-    if (await checkLimit(codeLimit, request, reply)) return
     if (!config.code || config.code.length < 12 || config.code.length > 256)
       return reply.code(503).send({
         code: 'access_configuration',
         message: 'Dostęp do demo wymaga konfiguracji kodu na serwerze.',
       })
+    if (await checkLimit(codeLimit, request, reply)) return
     const input = codeInput.safeParse(request.body)
     if (!input.success || !timingSafeEqual(hash(input.data.code), hash(config.code)))
       return reply
