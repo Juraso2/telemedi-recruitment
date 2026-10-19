@@ -11,6 +11,7 @@ const noteStatus: Record<NoteErrorCode, number> = {
 
 export function registerApi(app: FastifyInstance, notes: ReturnType<typeof createNoteService>) {
   app.get('/api/health', async () => ({ status: 'ok' }))
+
   app.post('/api/notes', async (request, reply) => {
     const result = await notes.createNote(request.body)
     if (result.ok) return { note: result.note }

@@ -114,30 +114,41 @@ export function DemoAccess({ access }: { access: Access }) {
       setBusy(false)
     }
   }
-  if (access.checking) return <p className="input-hint">Sprawdzamy dostęp do demo…</p>
-  if (access.expiresAt) return <p className="input-hint">Dostęp do demo jest aktywny.</p>
+  if (access.checking)
+    return (
+      <p className="mt-2 mb-6 text-xs leading-relaxed text-muted-foreground">
+        Sprawdzamy dostęp do demo…
+      </p>
+    )
+  if (access.expiresAt)
+    return (
+      <p className="mt-2 mb-6 text-xs leading-relaxed text-muted-foreground">
+        Dostęp do demo jest aktywny.
+      </p>
+    )
   return (
     <form
-      className="demo-access"
+      className="my-6 min-w-0 rounded-xl border bg-muted/40 p-4"
       onSubmit={(event) => void unlock(event)}
       aria-label="Dostęp do demo"
       aria-busy={busy}
     >
-      <p className="body-copy">
+      <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
         {access.expired
           ? 'Dostęp wygasł lub wymaga odnowienia. Wpisz kod ponownie, aby korzystać z AI. Twoja wypowiedź pozostaje w aplikacji.'
           : 'Wpisz wspólny kod, aby korzystać z AI w demo. Dostęp jest ważny do 24 godzin. Możesz wcześniej przygotować wypowiedź.'}
       </p>
       {access.checkError && (
-        <p className="input-hint">
+        <p className="mt-2 mb-6 text-xs leading-relaxed text-muted-foreground">
           Nie udało się sprawdzić dostępu. Możesz ponowić próbę, wpisując kod.
         </p>
       )}
-      <label className="field-label" htmlFor="demo-code">
+      <label className="mb-2 block text-sm leading-normal font-medium" htmlFor="demo-code">
         Kod dostępu do demo
       </label>
       <input
         id="demo-code"
+        className="block min-h-11 w-full min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-base text-foreground focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
         ref={input}
         type="password"
         value={code}
@@ -148,15 +159,22 @@ export function DemoAccess({ access }: { access: Access }) {
         disabled={busy}
         aria-describedby="demo-code-hint"
       />
-      <p id="demo-code-hint" className="input-hint">
+      <p id="demo-code-hint" className="mt-2 mb-6 text-xs leading-relaxed text-muted-foreground">
         Kod nie tworzy konta i nie szyfruje danych w tej przeglądarce.
       </p>
       {error && (
-        <p className="error-message" role="alert">
+        <p
+          className="my-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm leading-relaxed text-destructive"
+          role="alert"
+        >
           {error}
         </p>
       )}
-      <Button type="submit" className="primary-action" disabled={busy || !code}>
+      <Button
+        type="submit"
+        className="min-h-11 w-full gap-3 rounded-lg px-4 py-3 text-sm whitespace-normal sm:w-auto"
+        disabled={busy || !code}
+      >
         {busy ? 'Sprawdzamy kod…' : 'Odblokuj dostęp'}
       </Button>
     </form>

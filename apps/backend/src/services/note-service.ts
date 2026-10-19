@@ -26,6 +26,7 @@ export type NoteErrorCode = keyof typeof errorMessages
 export type NoteResult =
   | { ok: true; note: string }
   | { ok: false; code: NoteErrorCode; message: string }
+
 function failure(code: NoteErrorCode): NoteResult {
   return { ok: false, code, message: errorMessages[code] }
 }
@@ -69,9 +70,11 @@ export function createNoteService(config: NoteModelConfig) {
     async createNote(body: unknown): Promise<NoteResult> {
       const input = noteRequest.safeParse(body)
       if (!input.success) return failure('invalid_input')
+
       // This runtime owns the source only for the duration of this request.
       const runtime = createNoteRuntime(config)
       if (!runtime) return failure('configuration')
+
       try {
         for (let attempt = 0; ; attempt++) {
           try {
@@ -88,9 +91,11 @@ export function createNoteService(config: NoteModelConfig) {
                 },
               )
             if (result.error) throw result.error
+
             const output = noteOutputSchema.parse(result.object)
             if (!output.inScope) return failure('out_of_scope')
             if (!output.note.trim()) return failure('generation_failed')
+
             return { ok: true, note: output.note.trim() }
           } catch (error) {
             const cause = noteFailure(error)

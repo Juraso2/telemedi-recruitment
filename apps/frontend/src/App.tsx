@@ -128,71 +128,87 @@ export function App() {
           : 3
 
   return (
-    <div className="app-shell">
-      <a className="skip-link" href="#main">
+    <div className="min-h-svh bg-background">
+      <a
+        className="sr-only z-10 rounded-lg bg-background p-3 focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
+        href="#main"
+      >
         Przejdź do treści
       </a>
-      <header className="site-header">
-        <span className="brand">
-          <span className="brand-mark" aria-hidden="true">
-            n.
-          </span>
-          Niewypowiedziane
-          <span className="brand-dot" aria-hidden="true">
-            .
-          </span>
-        </span>
-        <span className="header-caption">Twoje słowa. W swoim tempie.</span>
-      </header>
-      <main id="main" className="workspace">
-        <aside className="intro-column" aria-label="O tej przestrzeni">
-          <p className="eyebrow">PO ROZMOWIE ZOSTAJĄ SŁOWA</p>
-          <p className="intro-quote">
-            To, czego nie udało Ci się <em>powiedzieć.</em>
+      <main
+        id="main"
+        className="mx-auto grid w-full max-w-6xl grid-cols-1 items-start gap-6 px-4 py-6 sm:gap-8 sm:px-6 sm:py-8 lg:grid-cols-3 lg:gap-12 lg:px-8 lg:py-12"
+      >
+        <aside className="min-w-0 px-1 sm:px-0 lg:pt-8" aria-label="O tej przestrzeni">
+          <p className="text-xs leading-relaxed font-semibold tracking-widest text-muted-foreground">
+            PO ROZMOWIE ZOSTAJĄ SŁOWA
           </p>
-          <p className="intro-description">
+          <p className="my-3 max-w-md font-serif text-3xl leading-tight tracking-tight sm:text-4xl lg:my-6 lg:text-5xl">
+            To, czego nie udało Ci się <em className="font-normal text-primary">powiedzieć.</em>
+          </p>
+          <p className="hidden max-w-sm text-sm leading-relaxed text-muted-foreground lg:block">
             Czasem ważne myśli pojawiają się dopiero po konsultacji. Tutaj możesz dać im miejsce.
           </p>
-          <div className="gentle-rule" />
-          <p className="small-note">
+          <div className="my-8 hidden h-px w-12 bg-border lg:block" />
+          <p className="hidden text-sm leading-relaxed text-muted-foreground lg:block">
             Nie musisz zaczynać od początku.
             <br />
             Nie musisz mieć gotowych zdań.
           </p>
-          <p className="edition-label">WERSJA TEKSTOWA</p>
+          <p className="mt-10 hidden rounded-full border px-3 py-1 text-xs tracking-widest text-muted-foreground lg:inline-block">
+            WERSJA TEKSTOWA
+          </p>
         </aside>
+
         <section
-          className="session-card"
+          className="min-w-0 overflow-hidden rounded-2xl border bg-card shadow-sm lg:col-span-2"
           aria-labelledby="step-heading"
           aria-busy={step === 'loading'}
         >
-          <ol className="progress-list" aria-label="Etapy przygotowania notatki">
+          <ol
+            className="grid list-none grid-cols-2 gap-3 border-b bg-muted/40 p-4 sm:grid-cols-4 sm:gap-4 sm:px-6 sm:py-5"
+            aria-label="Etapy przygotowania notatki"
+          >
             {['Początek', 'Adresat', 'Wypowiedź', 'Notatka'].map((label, index) => (
               <li
                 key={label}
                 aria-current={current === index ? 'step' : undefined}
-                className={index <= current ? 'reached' : ''}
+                className={`flex min-w-0 items-center gap-2 text-xs ${index <= current ? 'text-primary' : 'text-muted-foreground'} ${index === current ? 'font-semibold' : ''}`}
               >
-                <span className="step-number" aria-hidden="true">
+                <span
+                  className={`grid size-6 shrink-0 place-items-center rounded-full border text-xs ${index <= current ? 'border-primary/40 bg-primary/10' : 'border-border'}`}
+                  aria-hidden="true"
+                >
                   {index + 1}
                 </span>
                 <span>{label}</span>
               </li>
             ))}
           </ol>
-          <div className="card-content">
-            <p className="eyebrow">
+
+          <div className="min-w-0 p-4 sm:p-6 lg:p-8">
+            <p className="text-xs leading-relaxed font-semibold tracking-widest text-muted-foreground">
               {step === 'note' ? 'Z TWOJEJ WYPOWIEDZI' : 'MIEJSCE NA TWOJĄ PERSPEKTYWĘ'}
             </p>
-            <h1 id="step-heading" ref={heading} tabIndex={-1}>
+            <h1
+              className="mt-3 mb-5 font-serif text-2xl leading-tight tracking-tight text-foreground sm:text-3xl"
+              id="step-heading"
+              ref={heading}
+            >
               {titles[step]}
             </h1>
+
             <DemoAccess access={access} />
+
             {error && (
-              <div role="alert" className="error-message">
+              <div
+                role="alert"
+                className="my-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm leading-relaxed text-destructive"
+              >
                 {error}
               </div>
             )}
+
             {step === 'intro' && (
               <form
                 onSubmit={(event) => {
@@ -200,39 +216,54 @@ export function App() {
                   else event.preventDefault()
                 }}
               >
-                <p className="body-copy">
+                <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
                   Zapisz to, co zostało po konsultacji. AI pomoże uporządkować Twoją wypowiedź w
                   osobistą notatkę dla specjalisty.
                 </p>
-                <div className="expectations">
-                  <p>
-                    <span aria-hidden="true">01</span>Wybierz, do kogo kierujesz swoje słowa.
+                <div className="my-6 space-y-4 border-y py-4 text-sm text-muted-foreground">
+                  <p className="flex items-baseline gap-3">
+                    <span className="shrink-0 text-xs text-primary" aria-hidden="true">
+                      01
+                    </span>
+                    Wybierz, do kogo kierujesz swoje słowa.
                   </p>
-                  <p>
-                    <span aria-hidden="true">02</span>Napisz i sprawdź swoją wypowiedź.
+                  <p className="flex items-baseline gap-3">
+                    <span className="shrink-0 text-xs text-primary" aria-hidden="true">
+                      02
+                    </span>
+                    Napisz i sprawdź swoją wypowiedź.
                   </p>
-                  <p>
-                    <span aria-hidden="true">03</span>Otrzymaj uporządkowaną notatkę.
+                  <p className="flex items-baseline gap-3">
+                    <span className="shrink-0 text-xs text-primary" aria-hidden="true">
+                      03
+                    </span>
+                    Otrzymaj uporządkowaną notatkę.
                   </p>
                 </div>
-                <p className="disclaimer">
+                <p className="text-xs leading-relaxed text-muted-foreground">
                   AI porządkuje tekst, nie diagnozuje i nie udziela pomocy w nagłych sytuacjach. Ta
                   aplikacja nie zastępuje kontaktu ze specjalistą.
                 </p>
-                <label className="adult-check">
+                <label className="mt-6 mb-5 flex cursor-pointer items-center gap-3 text-sm leading-normal">
                   <input
                     type="checkbox"
+                    className="size-5 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
                     checked={adultConfirmed}
                     onChange={(event) => setAdultConfirmed(event.target.checked)}
                     required
                   />
                   Mam ukończone 18 lat
                 </label>
-                <Button className="primary-action" type="submit" disabled={!adultConfirmed}>
+                <Button
+                  className="min-h-11 w-full gap-3 rounded-lg px-4 py-3 text-sm whitespace-normal sm:w-auto"
+                  type="submit"
+                  disabled={!adultConfirmed}
+                >
                   Zaczynam <span aria-hidden="true">→</span>
                 </Button>
               </form>
             )}
+
             {step === 'recipient' && (
               <form
                 onSubmit={(event) => {
@@ -240,19 +271,20 @@ export function App() {
                   else event.preventDefault()
                 }}
               >
-                <p className="body-copy">
+                <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
                   Wybierz specjalistę, z którym chcesz podzielić się tym, co zostało
                   niewypowiedziane.
                 </p>
-                <fieldset className="recipient-options">
+                <fieldset className="mb-6 grid min-w-0 gap-3">
                   <legend className="sr-only">Adresat notatki</legend>
                   {recipients.map((option) => (
                     <label
-                      className={`recipient-option ${recipient === option.value ? 'selected' : ''}`}
+                      className={`flex min-w-0 cursor-pointer items-center gap-3 rounded-lg border p-4 ${recipient === option.value ? 'border-primary/50 bg-primary/5' : 'border-input'}`}
                       key={option.value}
                     >
                       <input
                         type="radio"
+                        className="size-5 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2"
                         name="recipient"
                         value={option.value}
                         checked={recipient === option.value}
@@ -261,17 +293,24 @@ export function App() {
                         aria-label={option.label}
                       />
                       <span>
-                        <strong>{option.label}</strong>
-                        <span className="option-description">{option.description}</span>
+                        <strong className="block text-sm font-medium">{option.label}</strong>
+                        <span className="mt-1 block text-sm leading-relaxed text-muted-foreground">
+                          {option.description}
+                        </span>
                       </span>
                     </label>
                   ))}
                 </fieldset>
-                <Button className="primary-action" type="submit" disabled={!recipient}>
+                <Button
+                  className="min-h-11 w-full gap-3 rounded-lg px-4 py-3 text-sm whitespace-normal sm:w-auto"
+                  type="submit"
+                  disabled={!recipient}
+                >
                   Wolę napisać <span aria-hidden="true">→</span>
                 </Button>
               </form>
             )}
+
             {step === 'account' && (
               <form
                 onSubmit={(event) => {
@@ -279,14 +318,15 @@ export function App() {
                   else event.preventDefault()
                 }}
               >
-                <p className="body-copy">
+                <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
                   Co chcesz dopowiedzieć po konsultacji? Nie musisz porządkować myśli. Wystarczy też
                   kilka słów.
                 </p>
-                <label className="field-label" htmlFor="account">
+                <label className="mb-2 block text-sm leading-normal font-medium" htmlFor="account">
                   Twoja wypowiedź
                 </label>
                 <textarea
+                  className="min-h-48 w-full min-w-0 resize-y rounded-lg border border-input bg-background p-3 text-base leading-relaxed placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 sm:p-4 sm:text-sm"
                   id="account"
                   value={account}
                   onChange={(event) => setAccount(event.target.value)}
@@ -295,30 +335,40 @@ export function App() {
                   placeholder="Po naszej rozmowie zostało mi coś ważnego do powiedzenia…"
                   aria-describedby="account-hint"
                 />
-                <p id="account-hint" className="input-hint">
+                <p
+                  id="account-hint"
+                  className="mt-2 mb-6 text-xs leading-relaxed text-muted-foreground"
+                >
                   {account.length.toLocaleString('pl-PL')} / 20 000 znaków. Możesz poprawić tekst
                   przed wysłaniem.
                 </p>
-                <Button className="primary-action" type="submit" disabled={!account.trim()}>
+                <Button
+                  className="min-h-11 w-full gap-3 rounded-lg px-4 py-3 text-sm whitespace-normal sm:w-auto"
+                  type="submit"
+                  disabled={!account.trim()}
+                >
                   Zatwierdź wypowiedź <span aria-hidden="true">→</span>
                 </Button>
               </form>
             )}
+
             {step === 'review' && (
               <>
-                <p className="body-copy">
+                <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
                   To jest materiał dla AI. Po wybraniu „Przygotuj notatkę” wyślemy go do OpenAI, aby
                   uporządkować Twoje słowa.
                 </p>
-                <p className="recipient-summary">
+                <p className="mb-3 text-sm text-muted-foreground">
                   Adresat:{' '}
                   <strong>{recipients.find((option) => option.value === recipient)?.label}</strong>
                 </p>
-                <p className="source-text">{account}</p>
-                <div className="action-row">
+                <p className="rounded-lg bg-muted p-4 text-sm leading-relaxed whitespace-pre-wrap wrap-anywhere">
+                  {account}
+                </p>
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <Button
                     variant="outline"
-                    className="secondary-action"
+                    className="min-h-11 w-full gap-3 rounded-lg px-4 py-3 text-sm whitespace-normal sm:w-auto"
                     onClick={() => {
                       setError('')
                       setStep('account')
@@ -327,7 +377,7 @@ export function App() {
                     Popraw wypowiedź
                   </Button>
                   <Button
-                    className="primary-action"
+                    className="min-h-11 w-full gap-3 rounded-lg px-4 py-3 text-sm whitespace-normal sm:w-auto"
                     disabled={access.checking || !access.expiresAt}
                     onClick={() => void generate()}
                   >
@@ -337,29 +387,31 @@ export function App() {
                 </div>
               </>
             )}
+
             {step === 'loading' && (
-              <output className="loading-state">
-                <span className="loading-dot" aria-hidden="true" />
+              <output className="block py-6 text-sm leading-relaxed text-muted-foreground">
+                <span
+                  className="mb-5 block size-6 animate-spin rounded-full border-2 border-border border-t-primary motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
                 <p>
                   Przygotowujemy osobistą notatkę na podstawie Twojej wypowiedzi. To może potrwać
                   chwilę.
                 </p>
               </output>
             )}
+
             {step === 'note' && (
               <NoteReview note={note} source={account} onNewSession={newSession} />
             )}
           </div>
-          <footer className="card-footer">
+
+          <footer className="flex items-start gap-2 border-t p-4 text-xs leading-relaxed text-muted-foreground sm:px-6 lg:px-8">
             <span aria-hidden="true">◇</span> Twoja wypowiedź nie jest zapisywana w historii tej
             wersji. Odświeżenie usuwa bieżącą pracę.
           </footer>
         </section>
       </main>
-      <footer className="site-footer">
-        <span>Niewypowiedziane</span>
-        <span>Mały krok do dalszej rozmowy.</span>
-      </footer>
     </div>
   )
 }

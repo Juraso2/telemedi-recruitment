@@ -36,35 +36,43 @@ export function NoteReview({ note, source, onNewSession }: NoteReviewProps) {
 
   return (
     <>
-      <h2 className="note-heading" ref={heading} tabIndex={-1}>
+      <h2
+        className="mb-3 text-lg font-semibold focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-4"
+        ref={heading}
+        tabIndex={-1}
+      >
         {approved ? 'Zatwierdzona notatka' : 'Sprawdź treść notatki'}
       </h2>
-      <p className="body-copy">
+      <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
         {approved
           ? 'To wersja zatwierdzona przez Ciebie. Możesz ją skopiować i samodzielnie przekazać specjaliście.'
           : 'Porównaj propozycję ze swoją wypowiedzią. Możesz zmienić treść, zanim ją zatwierdzisz.'}
       </p>
-      <details className="note-source">
-        <summary>Wypowiedź źródłowa</summary>
-        <p className="source-text">{source}</p>
+      <details className="mb-6">
+        <summary className="cursor-pointer py-3 text-sm text-primary focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2">
+          Wypowiedź źródłowa
+        </summary>
+        <p className="rounded-lg bg-muted p-4 text-sm leading-relaxed whitespace-pre-wrap wrap-anywhere">
+          {source}
+        </p>
       </details>
       {approved ? (
         <>
-          <label className="field-label" htmlFor="approved-note">
+          <label className="mb-2 block text-sm leading-normal font-medium" htmlFor="approved-note">
             Treść zatwierdzonej notatki
           </label>
           <textarea
             id="approved-note"
             ref={approvedText}
-            className="note-paper"
+            className="min-h-48 w-full min-w-0 resize-y rounded-lg border border-input border-l-4 border-l-primary/50 bg-muted/40 p-3 text-base leading-relaxed whitespace-pre-wrap wrap-anywhere focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 sm:p-4 sm:text-sm"
             rows={10}
             value={text}
             readOnly
           />
-          <div className="action-row">
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Button
               variant="outline"
-              className="secondary-action"
+              className="min-h-11 w-full gap-3 rounded-lg px-4 py-3 text-sm whitespace-normal sm:w-auto"
               onClick={() => {
                 copyAttempt.current += 1
                 setCopyStatus('idle')
@@ -74,14 +82,14 @@ export function NoteReview({ note, source, onNewSession }: NoteReviewProps) {
               Wróć do edycji
             </Button>
             <Button
-              className="primary-action"
+              className="min-h-11 w-full gap-3 rounded-lg px-4 py-3 text-sm whitespace-normal sm:w-auto"
               disabled={copyStatus === 'copying'}
               onClick={() => void copy()}
             >
               Kopiuj
             </Button>
           </div>
-          <output className="copy-status">
+          <output className="mt-4 block text-sm leading-relaxed text-muted-foreground">
             {copyStatus === 'copied'
               ? 'Skopiowano notatkę.'
               : copyStatus === 'copying'
@@ -89,15 +97,18 @@ export function NoteReview({ note, source, onNewSession }: NoteReviewProps) {
                 : ''}
           </output>
           {copyStatus === 'failed' && (
-            <div className="copy-fallback">
-              <p role="alert" className="error-message">
+            <div>
+              <p
+                role="alert"
+                className="my-4 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm leading-relaxed text-destructive"
+              >
                 Nie udało się skopiować notatki. Możesz ponownie wybrać „Kopiuj” albo zaznaczyć
                 tekst i skopiować go ręcznie. Na komputerze użyj Ctrl+C lub ⌘C, a na telefonie opcji
                 „Kopiuj” po zaznaczeniu tekstu.
               </p>
               <Button
                 variant="outline"
-                className="secondary-action"
+                className="min-h-11 w-full gap-3 rounded-lg px-4 py-3 text-sm whitespace-normal sm:w-auto"
                 onClick={() => {
                   approvedText.current?.focus()
                   approvedText.current?.select()
@@ -115,38 +126,46 @@ export function NoteReview({ note, source, onNewSession }: NoteReviewProps) {
             if (text.trim()) setApproved(true)
           }}
         >
-          <label className="field-label" htmlFor="note-text">
+          <label className="mb-2 block text-sm leading-normal font-medium" htmlFor="note-text">
             Treść notatki
           </label>
           <textarea
             id="note-text"
+            className="min-h-48 w-full min-w-0 resize-y rounded-lg border border-input bg-background p-3 text-base leading-relaxed placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-2 sm:p-4 sm:text-sm"
             rows={10}
             value={text}
             onChange={(event) => setText(event.target.value)}
             aria-describedby="note-edit-hint"
           />
-          <p id="note-edit-hint" className="input-hint">
+          <p
+            id="note-edit-hint"
+            className="mt-2 mb-6 text-xs leading-relaxed text-muted-foreground"
+          >
             AI może popełniać błędy. Sprawdź, czy tekst oddaje to, co chcesz przekazać.
           </p>
-          <Button type="submit" className="primary-action" disabled={!text.trim()}>
+          <Button
+            type="submit"
+            className="min-h-11 w-full gap-3 rounded-lg px-4 py-3 text-sm whitespace-normal sm:w-auto"
+            disabled={!text.trim()}
+          >
             Zatwierdź treść
           </Button>
         </form>
       )}
-      <p className="note-footnote">
+      <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
         Nikt nie otrzymał tej notatki automatycznie. Samodzielnie decydujesz, czy i komu ją
         przekazać.
       </p>
-      <div className="new-session-action">
+      <div className="mt-6 border-t pt-5">
         <Button
           variant="outline"
-          className="secondary-action"
+          className="min-h-11 w-full gap-3 rounded-lg px-4 py-3 text-sm whitespace-normal sm:w-auto"
           onClick={onNewSession}
           aria-describedby="new-session-hint"
         >
           Nowa sesja
         </Button>
-        <p id="new-session-hint" className="input-hint">
+        <p id="new-session-hint" className="mt-2 text-xs leading-relaxed text-muted-foreground">
           Nowa sesja usunie bieżącą wypowiedź i notatkę z tej karty.
         </p>
       </div>
